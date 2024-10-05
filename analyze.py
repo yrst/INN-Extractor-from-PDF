@@ -81,6 +81,9 @@ class GUI:
         self.removed_clients_tree.heading(0, text='Удаленные ИНН')
         self.removed_clients_tree.pack()
 
+        self.copy_removed_button = tk.Button(self.left_frame, text="Копировать", command=self.copy_removed)
+        self.copy_removed_button.pack()
+
         self.right_frame = tk.Frame(self.result_frame)
         self.right_frame.pack(side='left')
 
@@ -90,6 +93,9 @@ class GUI:
         self.added_clients_tree = ttk.Treeview(self.right_frame, columns=("INN",), show='headings')
         self.added_clients_tree.heading(0, text='Добавленные ИНН')
         self.added_clients_tree.pack()
+
+        self.copy_added_button = tk.Button(self.right_frame, text="Копировать", command=self.copy_added)
+        self.copy_added_button.pack()
 
         self.result_label = tk.Label(self.root, text="")
         self.result_label.pack()
@@ -141,6 +147,24 @@ class GUI:
         result_text += f"Удаленные клиенты: {len(removed_clients)}"
 
         self.result_label.config(text=result_text)
+
+    def copy_removed(self):
+        self.root.clipboard_clear()
+        items = self.removed_clients_tree.get_children()
+        text = ""
+        for item in items:
+            text += self.removed_clients_tree.item(item, 'values')[0] + "\n"
+        self.root.clipboard_append(text.strip())
+        self.root.update()  # Обновление окна для применения изменений
+
+    def copy_added(self):
+        self.root.clipboard_clear()
+        items = self.added_clients_tree.get_children()
+        text = ""
+        for item in items:
+            text += self.added_clients_tree.item(item, 'values')[0] + "\n"
+        self.root.clipboard_append(text.strip())
+        self.root.update()  # Обновление окна для применения изменений
 
     def run(self):
         self.root.mainloop()
