@@ -28,7 +28,7 @@
 
 Для сборки скрипта в `.exe` файл, используйте команду:
 ```bash
-pyinstaller --onefile --windowed ваш_скрипт.py
+pyinstaller --onefile --windowed analyze.py
 ```
 Это создаст `.exe` файл, который можно запускать на любом ПК под Windows без необходимости установки Python или других зависимостей.
 
