@@ -71,6 +71,29 @@ class GUI:
         self.result_frame = tk.Frame(self.root)
         self.result_frame.pack()
 
+        self.left_frame = tk.Frame(self.result_frame)
+        self.left_frame.pack(side='left')
+
+        self.old_clients_count_label = tk.Label(self.left_frame, text="")
+        self.old_clients_count_label.pack()
+
+        self.removed_clients_tree = ttk.Treeview(self.left_frame, columns=("INN",), show='headings')
+        self.removed_clients_tree.heading(0, text='Удаленные ИНН')
+        self.removed_clients_tree.pack()
+
+        self.right_frame = tk.Frame(self.result_frame)
+        self.right_frame.pack(side='left')
+
+        self.new_clients_count_label = tk.Label(self.right_frame, text="")
+        self.new_clients_count_label.pack()
+
+        self.added_clients_tree = ttk.Treeview(self.right_frame, columns=("INN",), show='headings')
+        self.added_clients_tree.heading(0, text='Добавленные ИНН')
+        self.added_clients_tree.pack()
+
+        self.result_label = tk.Label(self.root, text="")
+        self.result_label.pack()
+
     def select_old_file(self):
         file_path = filedialog.askopenfilename(filetypes=[("PDF files", "*.pdf")])
         self.old_file_entry.delete(0, tk.END)
@@ -102,41 +125,22 @@ class GUI:
 
         added_clients, removed_clients = compare_clients([x for x in old_inn if x.isdigit()], [x for x in new_inn if x.isdigit()])
 
-        # Создание таблиц для вывода результатов
-        self.result_frame.destroy()
-        self.result_frame = tk.Frame(self.root)
-        self.result_frame.pack()
+        self.removed_clients_tree.delete(*self.removed_clients_tree.get_children())
+        self.added_clients_tree.delete(*self.added_clients_tree.get_children())
 
-        left_frame = tk.Frame(self.result_frame)
-        left_frame.pack(side=tk.LEFT, padx=10)
-        right_frame = tk.Frame(self.result_frame)
-        right_frame.pack(side=tk.RIGHT, padx=10)
+        for client in removed_clients:
+            self.removed_clients_tree.insert('', 'end', values=(client,))
 
-        tk.Label(left_frame, text="Добавленные клиенты:").pack()
-        added_tree = ttk.Treeview(left_frame, columns=('INN',), show='headings')
-        added_tree.heading('INN', text='ИНН')
-        added_tree.pack()
-        for inn in added_clients:
-            added_tree.insert('', 'end', values=(inn,))
+        for client in added_clients:
+            self.added_clients_tree.insert('', 'end', values=(client,))
 
-        tk.Label(right_frame, text="Удаленные клиенты:").pack()
-        removed_tree = ttk.Treeview(right_frame, columns=('INN',), show='headings')
-        removed_tree.heading('INN', text='ИНН')
-        removed_tree.pack()
-        for inn in removed_clients:
-            removed_tree.insert('', 'end', values=(inn,))
+        self.old_clients_count_label.config(text=f"Количество в старом файле: {len([x for x in old_inn if x.isdigit()])}")
+        self.new_clients_count_label.config(text=f"Количество в новом файле: {len([x for x in new_inn if x.isdigit()])}")
 
-        # Добавление кнопок для копирования ИНН
-        def copy_added_inn():
-            self.root.clipboard_clear()
-            self.root.clipboard_append('\n'.join(added_clients))
+        result_text = f"Добавленные клиенты: {len(added_clients)}\n"
+        result_text += f"Удаленные клиенты: {len(removed_clients)}"
 
-        def copy_removed_inn():
-            self.root.clipboard_clear()
-            self.root.clipboard_append('\n'.join(removed_clients))
-
-        tk.Button(left_frame, text="Копировать", command=copy_added_inn).pack()
-        tk.Button(right_frame, text="Копировать", command=copy_removed_inn).pack()
+        self.result_label.config(text=result_text)
 
     def run(self):
         self.root.mainloop()
